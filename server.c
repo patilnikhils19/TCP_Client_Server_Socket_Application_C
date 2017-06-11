@@ -11,6 +11,7 @@
 void *client_thread(void *);
 int fibo(int number);
 int ran(int high, int low);
+void simple_sort(int *arr, int length);
  
 int main(int argc , char *argv[])
 {
@@ -71,7 +72,7 @@ void *client_thread(void *socket_tcp)
     int connected = *(int*)socket_tcp;
     char send_data [4096] , recv_data[4096];
     int bytes_recieved, sin_size;
-    printf("server is listening");
+    printf("server is listening\n");
     FILE *fp;
     while ((bytes_recieved = recv(connected,recv_data,1024,0))>0)
             {
@@ -145,24 +146,47 @@ void *client_thread(void *socket_tcp)
                         fclose(fp);
                 	send(connected, buffer,strlen(buffer), 0);
                 }
-              else if (strcmp(recv_data, "sort 1 5 7 10")==0)
+              else if (strstr(recv_data, "sort") != NULL)
                 {
 			fp = fopen("record.txt", "a+");
 			fputs(recv_data,fp);
-                	char buffer[1024] = "10 7 5 1";
-                        fputs(buffer, fp);
+			fputs("\n",fp);
+
+                        char * delimeter;
+                        int array[10], i = 0;
+			int*  result_array;
+                        delimeter = strtok (recv_data," ");
+                        while (delimeter != NULL)
+                        {
+                                array[i] = atoi(delimeter);
+                                delimeter = strtok (NULL, " ");
+                                //printf("%d\n", array[i]);
+                                i++;
+                        }
+
+			simple_sort(array,10);
+
+			for(int j =0;j<10; j++){
+                        	char buffer[1024];
+				char delime[2] = ",\t";
+                        	snprintf(buffer, 10, "%d", array[j]);
+				fputs(buffer, fp);
+	                        send(connected, buffer,strlen(buffer), 0);
+				fputs(delime, fp);
+				send(connected, delime,strlen(delime), 0);
+			}	
 			fputs("\n",fp);
                         fclose(fp);
-                	send(connected, buffer,strlen(buffer), 0);
+                	
                 }
 	      else if (strcmp(recv_data, "show history")==0)
 		{
 			fp = fopen("record.txt", "a+");
 			fputs(recv_data,fp);
 			fputs("\n",fp);
-                	char buffer[1024] = "show history Command";
-                        fputs(buffer, fp);
-			fputs("\n",fp);
+                	//char buffer[1024] = "show history Command";
+                        //fputs(buffer, fp);
+			//fputs("\n",fp);
                         fclose(fp);
 			fp = fopen("record.txt", "r"); /* should check the result */
     			char line[256];
@@ -179,7 +203,7 @@ void *client_thread(void *socket_tcp)
 		}
 	      fflush(stdout);
             }
-    return 0;
+    return NULL;
 }
 
 
@@ -223,5 +247,30 @@ int ran(int low, int high)
         result = (rand() % (high- low)) + low;
         printf("Resulted random number = %d " , result);
         return result;
+}
+
+//Simple Bubble Sort algoithm to sort small array with complexity o(n^2)
+void simple_sort(int *arr, int length)
+{
+    int *i, *j, swap;
+    int *end = NULL;
+
+    if(length < 2 || arr == NULL)
+        return;
+
+    end = arr + length - 1;
+
+    for(i = arr; i < end; i++)
+    {
+        for(j = i + 1; j <= end; j++)
+        {
+            if(*j > *i)
+            {
+                swap = *i;
+                *i = *j;
+                *j = swap;
+            }
+        }
+    }
 }
 
