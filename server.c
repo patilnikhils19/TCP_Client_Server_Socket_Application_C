@@ -1,3 +1,8 @@
+/* Author: Nikhil Patil
+   Email: pailnikhils19@gmail.com
+   Date: 8 June 2017 
+*/
+
 #include<stdio.h>
 #include<string.h>    
 #include<stdlib.h>    

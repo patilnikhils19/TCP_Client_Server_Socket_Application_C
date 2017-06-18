@@ -1,7 +1,0 @@
-random 5 5
-5
-random 5 7
-7
-exit
-show history
-exit
